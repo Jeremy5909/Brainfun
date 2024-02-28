@@ -50,6 +50,11 @@ public:
     std::string subtract(const int& num) {
         return std::string(num, '-');
     }
+    std::string mult(const int& currPos, const int& num) {
+        std::string output;
+        output += move(currPos, currPos+1) + ">[<" + std::string(num, '+') + ">-]<";
+        return output;
+    }
     std::string set(const int& num = 0) {
         return "[-]" + std::string(num, '+');
     }
@@ -84,8 +89,8 @@ int main() {
     int currPos = 1;
 
     std::vector<std::function<std::string()>> instructions = {
-            [&]() { return bf.plainText("Ohio"); },
-
+            [&]() { return bf.efficient_num(5); },
+            [&]() { return bf.mult(currPos, 4); },
     };
 
 
