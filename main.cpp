@@ -20,7 +20,6 @@ private:
         for (int i = 2; i*i <= num ; i++) {
             if (num % i == 0) {
                 return false;
-                break;
             }
         }
         return true;
@@ -75,7 +74,7 @@ public:
         return "[" + set_pos(target) + "+" + negate_arrows(set_pos(target)) + "<-]";
     }
 
-    std::string raw_text(std::string text) {
+    std::string raw_text(const std::string& text) {
         // TODO make way more efficient by getting average and only adding necessary
         std::string output;
         for (auto& character : text) {
@@ -113,8 +112,6 @@ public:
 
 int main() {
     Brainfun bf;
-
-    const int NAME = 1;
 
     std::vector<std::function<std::string()>> instructions = {
             [&]() { return bf.set_pos(3); },
