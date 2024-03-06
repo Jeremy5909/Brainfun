@@ -2,6 +2,8 @@
 
 struct Brainfun {
 private:
+    int currPos = 1;
+
     std::string negate_arrows(const std::string& arrows) {
         std::string result = arrows;
         for(auto& arrow : result) {
@@ -49,15 +51,15 @@ public:
     // TODO make number that adds or subtractes based on input and effeciently w function
 
     // TODO make take pos ?
-    std::string mult(const unsigned int& currPos, const unsigned int& num) {
+    std::string mult(const unsigned int& num) {
         std::string output;
-        output += move(currPos, currPos+1) + ">[<" + std::string(num, '+') + ">-]<";
+        output += move(currPos+1) + ">[<" + std::string(num, '+') + ">-]<";
         return output;
     }
     std::string set(const unsigned int& num = 0) {
         return "[-]" + std::string(num, '+');
     }
-    std::string set_pos(unsigned int& currPos, unsigned int pos) {
+    std::string set_pos(unsigned int pos) {
         std::string output;
         if (pos > currPos) {
             output = std::string(pos - currPos, '>');
@@ -69,8 +71,8 @@ public:
         return output;
     }
 
-    std::string move(unsigned int currPos, int target) {
-        return "[" + set_pos(currPos, target) + "+" + negate_arrows(set_pos(currPos, target)) + "<-]";
+    std::string move(int target) {
+        return "[" + set_pos(target) + "+" + negate_arrows(set_pos(target)) + "<-]";
     }
 
     std::string raw_text(std::string text) {
@@ -82,27 +84,26 @@ public:
         return output;
     }
 
-
     // Make sure to have room one space after target
-    std::string duplicate_to(unsigned int currPos, unsigned int targetPos) {
+    std::string duplicate_to(unsigned int targetPos) {
         // TODO make it work even when one space after target isn't clean
         std::string output;
         unsigned int startPos = currPos;
 
         output += "["
-                + set_pos(currPos, targetPos)
+                + set_pos(targetPos)
                 + "+"
-                + set_pos(currPos, currPos + 1)
+                + set_pos(currPos + 1)
                 + "+"
-                + set_pos(currPos, startPos)
+                + set_pos(startPos)
                 + "-]"
-                + set_pos(currPos, targetPos + 1)
+                + set_pos(targetPos + 1)
                 + "["
-                + set_pos(currPos, startPos)
+                + set_pos(startPos)
                 + "+"
-                + set_pos(currPos, targetPos + 1)
+                + set_pos(targetPos + 1)
                 + "-]"
-                + set_pos(currPos, startPos);
+                + set_pos(startPos);
         return output;
     }
 
@@ -113,12 +114,10 @@ public:
 int main() {
     Brainfun bf;
 
-    unsigned int currPos = 1;
-
     const int NAME = 1;
 
     std::vector<std::function<std::string()>> instructions = {
-            [&]() { return bf.raw_text("Hello!"); },
+            [&]() { return bf.set_pos(3); },
     };
 
 
