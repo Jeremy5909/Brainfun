@@ -1,0 +1,3 @@
+/Users/jherczeg27/Documents/CLionProjects/brainfun/cmake-build-debug/CMakeFiles/brainfun.dir
+/Users/jherczeg27/Documents/CLionProjects/brainfun/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/jherczeg27/Documents/CLionProjects/brainfun/cmake-build-debug/CMakeFiles/rebuild_cache.dir
