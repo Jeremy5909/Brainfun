@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <regex>
 
 struct Brainfun {
 private:
@@ -117,72 +118,90 @@ public:
     std::string efficient_text(const std::string& text) {
         std::string output;
 
-        std::vector<std::vector<int>> groups;
+        const int CLOSENESS = 20;
+        const int started_pos = currPos;
+
+        std::vector<int> startNums;
         std::map<char, int> charToGroupIndex;
 
-        //
         for (char character : text) {
             bool added = false;
-            for (int i = 0; i < groups.size(); ++i) {
-                auto& group = groups[i];
-                if (abs(group[0] - character) <= 26) {
+
+            // Search for suitable startNum
+            for (int i = 0; i < startNums.size(); ++i) {
+                auto& startNum = startNums[i];
+                if (abs(startNum - character) <= CLOSENESS) {
                     added = true;
 
-                    group.push_back(static_cast<int>(character));
                     charToGroupIndex[character] = i;
-                    break; // Stop searching once a suitable group is found
+                    break; // Stop searching once a suitable startNum is found
                 }
             }
-            // If character didn't fit into any group, create a new one
+            // If character didn't fit into any startNum, create a new one
             if (!added) {
-                groups.push_back(std::vector<int> {static_cast<int>(character)}); // Correctly initialize with the ASCII value
-                charToGroupIndex[character] = groups.size() - 1;
+                startNums.push_back(character); // Correctly initialize with the ASCII value
+                charToGroupIndex[character] = startNums.size() - 1;
             }
         }
 
         // Set beginning nums
-        for (auto& group : groups) {
-            output += efficient_num(group[0]);
+        for (auto& startNum : startNums) {
+            output += efficient_num(startNum);
             output += set_pos(currPos + 1);
-            if (!shortMode) output +=  " //Initialize " + std::to_string(group[0]) + "\n";
+            if (!shortMode) output +=  " //Initialize " + std::to_string(startNum) + "\n";
         }
 
 
         for (auto& character : text) {
-            // Rework groups so they're just one int and not vector
-            int groupPos = charToGroupIndex[character];
-            std::vector<int> currGroup = groups[groupPos];
+            // Rework startNums so they're just one int and not vector
+            int& startNumPos = charToGroupIndex[character];
+            int& startNum = startNums[startNumPos];
 
-            output += set_pos(groupPos + 1);
-            int diffBetweenChars = static_cast<int>(character) - currGroup[0];
+            output += set_pos(startNumPos + 1);
+            int diffBetweenChars = static_cast<int>(character) - startNum;
 
 
             // Add/Subtract necessary
-            currGroup[0] = currGroup[0] + diffBetweenChars;
+            startNum = startNum + diffBetweenChars;
             if (diffBetweenChars > 0) {
                 output += std::string(diffBetweenChars, '+');
+                if (!shortMode) output += " //Add " + std::to_string(diffBetweenChars) + "\n";
             } else if (diffBetweenChars < 0) {
-                output += std::string(abs(diffBetweenChars), '-');
+                output += std::string(-diffBetweenChars, '-');
+                if (!shortMode) output += " //Subtract " + std::to_string(-diffBetweenChars) + "\n";
             }
             output += ".";
+            if (!shortMode) output += " //Print\n";
         }
+
+        // Reset everything to zero
+        output += set_pos(startNums.size());
+        for (int i = currPos; i > started_pos; --i) {
+            output += "[-]" + set_pos(currPos - 1);
+        }
+        output += "[-]";
+        if (!shortMode) output += " //Reset initial values to zero\n";
 
         return output;
     }
 
-    // TODO Have the type of curr. pos be template of either value or ref
+    static std::string make_sure_bf_neat(std::string original) {
+        std::string output;
+        output = std::regex_replace(original, std::regex("<>|><"), "");
+        return output;
+    }
 };
 
 int main() {
-    Brainfun bf(false);
+    Brainfun bf(true);
 
     std::vector<std::function<std::string()>> instructions = {
-            [&]() {return bf.efficient_text("Hello World!");}
+            [&]() {return bf.efficient_text("Hello, World!");}
     };
 
 
     for (const auto& instruction : instructions) {
-        std::cout << instruction();
+        std::cout << Brainfun::make_sure_bf_neat(instruction());
         if (!bf.shortMode) std::cout << "\n\n";
     }
 
