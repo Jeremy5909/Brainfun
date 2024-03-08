@@ -32,3 +32,9 @@
 *.out
 *.app
 
+# My additions
+.ninja_deps
+.ninja_log
+
+LastTest.log
+main.cpp.o
