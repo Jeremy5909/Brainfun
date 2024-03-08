@@ -57,12 +57,46 @@ public:
 
     // TODO make number that adds or subtractes based on input and effeciently w function
 
-    // TODO make take pos ?
     std::string mult(const unsigned int& num) {
         std::string output;
         output += move(currPos+1) + ">[<" + std::string(num, '+') + ">-]<";
         return output;
     }
+    std::string mult(unsigned int pos1, unsigned int pos2) {
+        std::string output;
+        int original_pos = currPos;
+
+        output += set_pos(pos1)
+                + duplicate_to(original_pos+2)
+                + set_pos(pos2)
+                + duplicate_to(original_pos + 3);
+        pos1 = original_pos+2;
+        pos2 = original_pos+3;
+        output += set_pos(pos1)
+                + "["
+                + set_pos(pos2)
+                + "["
+                + set_pos(original_pos)
+                + "+"
+                + set_pos(original_pos+1)
+                + "+"
+                + set_pos(pos2)
+                + "-]"
+                + set_pos(original_pos+1)
+                + "["
+                + set_pos(pos2)
+                + "+"
+                + set_pos(original_pos+1)
+                + "-]"
+                + set_pos(pos1)
+                + "-]"
+                + set_pos(pos2)
+                + set()
+                + set_pos(original_pos);
+        return output;
+    }
+
+
     std::string set(const unsigned int& num = 0) {
         return "[-]" + std::string(num, '+');
     }
@@ -177,18 +211,28 @@ public:
         // Reset everything to zero
         output += set_pos(startNums.size());
         for (int i = currPos; i > started_pos; --i) {
-            output += "[-]" + set_pos(currPos - 1);
+            output += set() + set_pos(currPos - 1);
         }
-        output += "[-]";
+        output += set();
         if (!shortMode) output += " //Reset initial values to zero\n";
 
         return output;
     }
 
-    static std::string make_sure_bf_neat(std::string original) {
-        std::string output;
-        output = std::regex_replace(original, std::regex("<>|><"), "");
-        return output;
+    static std::string make_sure_bf_neat(std::string text, int wrap = 0) {
+        // Fix going back n forth
+        text = std::regex_replace(text, std::regex("<>|><"), "");
+
+
+        if (wrap != 0) {
+            for (int i = 0; i < text.length(); ++i) {
+                if (i % wrap == 0 && i != 0) {
+                    text.insert(i, "\n");
+                }
+            }
+        }
+
+        return text;
     }
 };
 
@@ -196,12 +240,16 @@ int main() {
     Brainfun bf(true);
 
     std::vector<std::function<std::string()>> instructions = {
-            [&]() {return bf.efficient_text("Hello, World!");}
+            [&](){return bf.efficient_num(3);},
+            [&](){return bf.set_pos(2);},
+            [&](){return bf.efficient_num(2);},
+            [&](){return bf.set_pos(4);},
+            [&](){return bf.mult(1,2);},
     };
 
 
     for (const auto& instruction : instructions) {
-        std::cout << Brainfun::make_sure_bf_neat(instruction());
+        std::cout << Brainfun::make_sure_bf_neat(instruction(), 50);
         if (!bf.shortMode) std::cout << "\n\n";
     }
 
