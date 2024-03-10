@@ -79,3 +79,6 @@
 # Visual Studio files
 /.vs/
 /out/
+
+# Clion
+cmake-build-*
