@@ -178,21 +178,20 @@ public:
             }
         }
 
-        // Set beginning nums
+        // Initialize beginning numbers
         for (auto& startNum : startNums) {
             output += efficient_num(startNum);
             output += set_pos(currPos + 1);
             if (!shortMode) output +=  " //Initialize " + std::to_string(startNum) + "\n";
         }
 
-
+        // Printing n stuf
         for (auto& character : text) {
-            // Rework startNums so they're just one int and not vector
             int& startNumPos = charToGroupIndex[character];
             int& startNum = startNums[startNumPos];
 
-            output += set_pos(startNumPos + 1);
-            int diffBetweenChars = static_cast<int>(character) - startNum;
+            output += set_pos(startNumPos + started_pos);
+            int diffBetweenChars = character-startNum;
 
 
             // Add/Subtract necessary
@@ -208,12 +207,11 @@ public:
             if (!shortMode) output += " //Print\n";
         }
 
-        // Reset everything to zero
-        output += set_pos(startNums.size());
-        for (int i = currPos; i > started_pos; --i) {
-            output += set() + set_pos(currPos - 1);
+        // Delete initialized nums
+        for (int i = currPos; i > started_pos - 1; --i) {
+            output += set_pos(i); // Go back one
+            output += set(); // Set to 0
         }
-        output += set();
         if (!shortMode) output += " //Reset initial values to zero\n";
 
         return output;
@@ -240,16 +238,16 @@ int main() {
     Brainfun bf(true);
 
     std::vector<std::function<std::string()>> instructions = {
-            [&](){return bf.efficient_num(3);},
-            [&](){return bf.set_pos(2);},
-            [&](){return bf.efficient_num(2);},
-            [&](){return bf.set_pos(4);},
-            [&](){return bf.mult(1,2);},
+            [&](){return bf.set_pos(5);},
+            [&](){return bf.efficient_text("Hello *meow*");},
+
     };
+
+    std::cout << ">++++++++[<+++++++++>-]>+++++++[<+++++++++++++++>-]>+++[<+++++++++++>-]<<<.>.>.[-]<[-]<[-]\n";
 
 
     for (const auto& instruction : instructions) {
-        std::cout << Brainfun::make_sure_bf_neat(instruction(), 50);
+        std::cout << Brainfun::make_sure_bf_neat(instruction());
         if (!bf.shortMode) std::cout << "\n\n";
     }
 
