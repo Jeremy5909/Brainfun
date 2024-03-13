@@ -34,25 +34,40 @@ public:
     Brainfun(bool shortMode = true) : short_mode(shortMode) {}
 
     // TODO add second parameter for things like effecient_num for where to put the temp second num
-    std::string EfficientNum(unsigned int num) {
+    std::string Add(int num) {
+        std::string output;
         // TODO make go both up and down and choose which is best
-        if(num < 15) {
-            return std::string(num, '+');
+        if(abs(num) < 15) {
+            if (num > 0) {
+                output = std::string(num, '+');
+            } else if (num < 0) {
+                output = std::string(num, '-');
+            }
         } else {
             // Get two closest primes
             int additional = 0;
-            if (IsPrime(num)) {
+            int tempNum = abs(num);
+            if (IsPrime(tempNum)) {
                 additional = 1;
-                num = num - 1;
+                tempNum -= 1;
             }
-            int first_closest = (int) sqrt(num);
+            int first_closest = static_cast<int>(sqrt(tempNum));
             while (num % first_closest != 0) {
                 first_closest = first_closest - 1;
             }
-            int second_closest = (int) num / first_closest;
+            int second_closest = static_cast<int>(tempNum/first_closest);
 
-            return ">" + std::string(first_closest, '+') + "[<" + std::string(second_closest, '+') + ">-]<" + std::string(additional, '+');
+            output = SetPos(curr_pos+1) + std::string(first_closest, '+') + "[" + SetPos(curr_pos-1);
+
+            if (num > 0) {
+                output += std::string(second_closest, '+');
+            } else if (num < 0) {
+                output += std::string(second_closest, '-');
+            }
+
+            output += SetPos(curr_pos+1) + "-]" + SetPos(curr_pos - 1) + std::string(additional, '+');
         }
+        return output;
     }
 
     // TODO make number that adds or subtractes based on input and effeciently w function
@@ -118,7 +133,7 @@ public:
         // TODO make way more efficient by getting average and only adding necessary
         std::string output;
         for (auto& character : text) {
-            output += EfficientNum(int(character)) + "." + Set(); // Putitin , print , reset
+            output += Add(int(character)) + "." + Set(); // Putitin , print , reset
             if (!short_mode) output += std::string(" //Char ") + character + '\n'; // Comment
         }
         return output;
@@ -179,7 +194,7 @@ public:
 
         // Initialize beginning numbers
         for (auto& group_value : group_values) {
-            output += EfficientNum(group_value); // Initialize group value
+            output += Add(group_value); // Initialize group value
             output += SetPos(curr_pos + 1); // Go right
             if (!short_mode) output += " //Initialize " + std::to_string(group_value) + "\n";
         }
@@ -237,12 +252,25 @@ int main() {
     Brainfun bf;
 
     std::vector<std::function<std::string()>> instructions = {
-            [&](){return bf.EfficientText("Hello");},
+            [&](){return bf.EfficientText("First Num:\n");},
+            [&](){return ",";},
+            [&](){return bf.Add(-48);},
+            [&](){return bf.SetPos(2);},
+
+            [&](){return bf.EfficientText("Second Num:\n");},
+            [&](){return ",";},
+            [&](){return bf.Add(-48);},
+            [&](){return bf.SetPos(3);},
+
+            [&](){return bf.EfficientText("Result: ");},
+            [&](){return bf.Mult(1,2);},
+            [&](){return bf.Add(48);},
+            [&](){return ".";},
 
     };
 
     for (const auto& instruction : instructions) {
-        std::cout << Brainfun::CleanupBF(instruction());
+        std::cout << Brainfun::CleanupBF(instruction(),30);
         if (!bf.short_mode) std::cout << "\n\n";
     }
 
