@@ -234,15 +234,12 @@ public:
 };
 
 int main() {
-    Brainfun bf(true);
+    Brainfun bf;
 
     std::vector<std::function<std::string()>> instructions = {
-            [&](){return bf.EfficientText("Hello *meow*");},
+            [&](){return bf.EfficientText("Hello");},
 
     };
-
-    std::cout << ">++++++++[<+++++++++>-]>+++++++[<+++++++++++++++>-]>+++[<+++++++++++>-]<<<.>.>.[-]<[-]<[-]\n";
-
 
     for (const auto& instruction : instructions) {
         std::cout << Brainfun::CleanupBF(instruction());
