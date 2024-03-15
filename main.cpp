@@ -39,7 +39,6 @@ public:
 
     Brainfun(bool shortMode = true) : short_mode(shortMode) {}
 
-    // TODO add second parameter for things like effecient_num for where to put the temp second num
     std::string Add(int num) {
         std::string output;
         // TODO make go both up and down and choose which is best
@@ -75,8 +74,6 @@ public:
         }
         return output;
     }
-
-    // TODO make number that adds or subtractes based on input and effeciently w function
 
     std::string Mult(const unsigned int& num) {
         std::string output;
@@ -133,16 +130,6 @@ public:
 
     std::string Move(int target) {
         return "[" + SetPos(target) + "+" + NegateArrows(SetPos(target)) + "<-]";
-    }
-
-    std::string SlowText(const std::string& text) {
-        // TODO make way more efficient by getting average and only adding necessary
-        std::string output;
-        for (auto& character : text) {
-            output += Add(int(character)) + "." + Set(); // Putitin , print , reset
-            if (!short_mode) output += std::string(" //Char ") + character + '\n'; // Comment
-        }
-        return output;
     }
 
     // Make sure to have room one space after target
@@ -348,5 +335,5 @@ int main() {
     return 0;
 }
 
-// TODO have efficient_text have custom amount to skip forward instead of just going one
+// TODO have EfficientText, Add, and DuplicateTo have custom amount to skip forward instead of just going one
 // TODO way of doing loops
