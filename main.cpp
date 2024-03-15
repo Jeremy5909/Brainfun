@@ -1,12 +1,14 @@
-#include <map>
-#include <string>
-#include <vector>
 #include <iostream>
+#import <sstream>
+#import <fstream>
+#include <string>
+#include <map>
+#include <vector>
 #include <regex>
 
 struct Brainfun {
 private:
-    int curr_pos = 1;
+    unsigned int curr_pos = 1;
 
     std::string NegateArrows(const std::string& arrows) {
         std::string output = arrows;
@@ -30,6 +32,10 @@ private:
     }
 public:
     bool short_mode;
+
+    int getPos() {
+        return curr_pos;
+    }
 
     Brainfun(bool shortMode = true) : short_mode(shortMode) {}
 
@@ -248,31 +254,82 @@ public:
     }
 };
 
+void ProcessCommand(const std::string& command, Brainfun& bf, bool debug = false) {
+    if (debug) std::cout << "Processing command: " << command << std::endl;
+
+    std::stringstream ss(command);
+    std::string action;
+    ss >> action; // Assuming the first word is the action/command
+    if (action == "ADD") {
+        int num;
+        ss >> num; // Assuming an integer argument follows the command
+        std::cout << bf.Add(num); // Example of executing a method based on the command
+    } else if (action == "MULT") {
+        int num1;
+        ss >> num1;
+        int num2;
+
+        if (ss >> num2)
+        {
+            std::cout << bf.Mult(num1, num2);
+        } else {
+            std::cout << bf.Mult(num1);
+        }
+    } else if (action == "GO") {
+        std::string pos;
+        ss >> pos;
+        if (pos == "RIGHT") {
+            std::cout << bf.SetPos(bf.getPos() + 1);
+        } else if (pos == "LEFT") {
+            std::cout << bf.SetPos(bf.getPos() - 1);
+        } else {
+            std::cout << bf.SetPos(std::stoi(pos));
+        }
+    } else if (action == "SET") {
+        int value;
+        ss >> value;
+        bf.Set(value);
+    } else if (action == "MOVE") {
+        int pos;
+        ss >> pos;
+        bf.Move(pos);
+    } else if (action == "DUPE") {
+        int pos;
+        ss >> pos;
+        bf.DuplicateTo(pos);
+    } else if (action == "TEXT") {
+        std::string text;
+        getline(ss >> std::ws, text);
+        ss.ignore();
+        std::cout << bf.EfficientText(text);
+    }
+    else {
+        std::cerr << "Unknown command: " << action << std::endl;
+    }
+}
+
+
+void ExecuteFromFile(const std::string& filename, Brainfun& bf, bool debug = false) {
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    std::string line;
+    while (getline(file, line)) {
+        if (debug) std::cout << "Read line: " << line << std::endl; // Debugging output
+        ProcessCommand(line, bf, debug);
+    }
+}
+
+
 int main() {
     Brainfun bf;
 
-    std::vector<std::function<std::string()>> instructions = {
-            [&](){return bf.EfficientText("First Num:\n");},
-            [&](){return ",";},
-            [&](){return bf.Add(-48);},
-            [&](){return bf.SetPos(2);},
-
-            [&](){return bf.EfficientText("Second Num:\n");},
-            [&](){return ",";},
-            [&](){return bf.Add(-48);},
-            [&](){return bf.SetPos(3);},
-
-            [&](){return bf.EfficientText("Result: ");},
-            [&](){return bf.Mult(1,2);},
-            [&](){return bf.Add(48);},
-            [&](){return ".";},
-
-    };
-
-    for (const auto& instruction : instructions) {
-        std::cout << Brainfun::CleanupBF(instruction(),30);
-        if (!bf.short_mode) std::cout << "\n\n";
-    }
+    ExecuteFromFile("../code.txt", bf, false);
 
     return 0;
 }
+
+// TODO have efficient_text have custom amount to skip forward instead of just going one
