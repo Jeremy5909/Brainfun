@@ -237,25 +237,21 @@ public:
         return output;
     }
 
-    static std::string CleanupBF(std::string text, int wrap = 0) {
-        // Fix going back n forth
-        text = std::regex_replace(text, std::regex("<>|><"), "");
-
-
-        if (wrap != 0) {
-            for (int i = 0; i < text.length(); ++i) {
-                if (i % wrap == 0 && i != 0) {
-                    text.insert(i, "\n");
-                }
-            }
+    std::string CleanupBF(const std::string& input) {
+        if (input.find("<>") != std::string::npos || input.find("><") != std::string::npos) {
+            // Take out <> and >< and then run that back in
+            return CleanupBF(std::regex_replace(input, std::regex("<>|><"), ""));
         }
 
-        return text;
+        // For when none are left to finally return the clean output
+        return input;
     }
 };
 
-void ProcessCommand(const std::string& command, Brainfun& bf, bool debug = false) {
+std::string ProcessCommand(const std::string& command, Brainfun& bf, bool debug = false) {
     if (debug) std::cout << "Processing command: " << command << std::endl;
+
+    std::string output;
 
     std::stringstream ss(command);
     std::string action;
@@ -263,7 +259,7 @@ void ProcessCommand(const std::string& command, Brainfun& bf, bool debug = false
     if (action == "ADD") {
         int num;
         ss >> num; // Assuming an integer argument follows the command
-        std::cout << bf.Add(num); // Example of executing a method based on the command
+        output = bf.Add(num); // Example of executing a method based on the command
     } else if (action == "MULT") {
         int num1;
         ss >> num1;
@@ -271,61 +267,64 @@ void ProcessCommand(const std::string& command, Brainfun& bf, bool debug = false
 
         if (ss >> num2)
         {
-            std::cout << bf.Mult(num1, num2);
+            output = bf.Mult(num1, num2);
         } else {
-            std::cout << bf.Mult(num1);
+            output = bf.Mult(num1);
         }
     } else if (action == "GO") {
         std::string pos;
         ss >> pos;
         if (pos == "RIGHT") {
-            std::cout << bf.SetPos(bf.getPos() + 1);
+            output = bf.SetPos(bf.getPos() + 1);
         } else if (pos == "LEFT") {
-            std::cout << bf.SetPos(bf.getPos() - 1);
+            output = bf.SetPos(bf.getPos() - 1);
         } else {
-            std::cout << bf.SetPos(std::stoi(pos));
+            output = bf.SetPos(std::stoi(pos));
         }
     } else if (action == "SET") {
         int value;
         ss >> value;
-        std::cout << bf.Set(value);
+        output = bf.Set(value);
     } else if (action == "MOVE") {
         std::string pos;
         ss >> pos;
         if (pos == "RIGHT") {
-            std::cout << bf.Move(bf.getPos() + 1);
+            output = bf.Move(bf.getPos() + 1);
         } else if (pos == "LEFT") {
-            std::cout << bf.Move(bf.getPos() - 1);
+            output = bf.Move(bf.getPos() - 1);
         } else {
-            std::cout << bf.Move(std::stoi(pos));
+            output = bf.Move(std::stoi(pos));
         }
     } else if (action == "CLONE") {
         std::string pos;
         ss >> pos;
         if (pos == "RIGHT") {
-            std::cout << bf.DuplicateTo(bf.getPos() + 1);
+            output = bf.DuplicateTo(bf.getPos() + 1);
         } else if (pos == "LEFT") {
-            std::cout << bf.DuplicateTo(bf.getPos() - 1);
+            output = bf.DuplicateTo(bf.getPos() - 1);
         } else {
-            std::cout << bf.DuplicateTo(std::stoi(pos));
+            output = bf.DuplicateTo(std::stoi(pos));
         }
     } else if (action == "TEXT") {
         std::string text;
         getline(ss >> std::ws, text);
         ss.ignore();
-        std::cout << bf.EfficientText(text);
+        output = bf.EfficientText(text);
     } else if (action == "__") {
         std::string text;
         getline(ss >> std::ws, text);
-        std::cout << text;
+        output = text;
     }
     else if (action != "//"){
         std::cerr << "Unknown command: " << action << std::endl;
     }
+
+    return output;
 }
 
 
 void ExecuteFromFile(const std::string& filename, Brainfun& bf, bool debug = false) {
+    std::string output;
     std::ifstream file(filename);
     if (!file) {
         std::cerr << "Failed to open file: " << filename << std::endl;
@@ -335,19 +334,19 @@ void ExecuteFromFile(const std::string& filename, Brainfun& bf, bool debug = fal
     std::string line;
     while (getline(file, line)) {
         if (debug) std::cout << "Read line: " << line << std::endl; // Debugging output
-        ProcessCommand(line, bf, debug);
+        output += ProcessCommand(line, bf, debug);
     }
+    std::cout << bf.CleanupBF(output);
 }
 
 
 int main() {
     Brainfun bf;
 
-    ExecuteFromFile("../code.txt", bf, false);
+    ExecuteFromFile("../code.txt", bf);
 
     return 0;
 }
 
 // TODO have efficient_text have custom amount to skip forward instead of just going one
 // TODO way of doing loops
-// TODO have it take out <> or ><
