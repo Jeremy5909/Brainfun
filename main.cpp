@@ -288,22 +288,38 @@ void ProcessCommand(const std::string& command, Brainfun& bf, bool debug = false
     } else if (action == "SET") {
         int value;
         ss >> value;
-        bf.Set(value);
+        std::cout << bf.Set(value);
     } else if (action == "MOVE") {
-        int pos;
+        std::string pos;
         ss >> pos;
-        bf.Move(pos);
-    } else if (action == "DUPE") {
-        int pos;
+        if (pos == "RIGHT") {
+            std::cout << bf.Move(bf.getPos() + 1);
+        } else if (pos == "LEFT") {
+            std::cout << bf.Move(bf.getPos() - 1);
+        } else {
+            std::cout << bf.Move(std::stoi(pos));
+        }
+    } else if (action == "CLONE") {
+        std::string pos;
         ss >> pos;
-        bf.DuplicateTo(pos);
+        if (pos == "RIGHT") {
+            std::cout << bf.DuplicateTo(bf.getPos() + 1);
+        } else if (pos == "LEFT") {
+            std::cout << bf.DuplicateTo(bf.getPos() - 1);
+        } else {
+            std::cout << bf.DuplicateTo(std::stoi(pos));
+        }
     } else if (action == "TEXT") {
         std::string text;
         getline(ss >> std::ws, text);
         ss.ignore();
         std::cout << bf.EfficientText(text);
+    } else if (action == "__") {
+        std::string text;
+        getline(ss >> std::ws, text);
+        std::cout << text;
     }
-    else {
+    else if (action != "//"){
         std::cerr << "Unknown command: " << action << std::endl;
     }
 }
@@ -333,3 +349,5 @@ int main() {
 }
 
 // TODO have efficient_text have custom amount to skip forward instead of just going one
+// TODO way of doing loops
+// TODO have it take out <> or ><
